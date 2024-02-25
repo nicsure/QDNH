@@ -102,6 +102,8 @@ namespace QDNH
                                 break;
                         }
                     }
+                    else
+                        DisplayAll();
                 }
             }
         }
@@ -189,15 +191,20 @@ namespace QDNH
             Console.WriteLine($"\nAudio Latency\n  {Vars.Latency}");
         }
 
-        private static void Init()
+        private static void DisplayAll()
         {
-            Console.WriteLine("(* shows currently selected)\n");
             DisplayInputs();
             DisplayOutputs();
             DisplayComPorts();
             DisplayNetPorts();
             DisplayPassword(false);
             DisplayLatency();
+        }
+
+        private static void Init()
+        {
+            Console.WriteLine("(* shows currently selected)\n");
+            DisplayAll();
             Vars.Save();
             serialPort?.Close();
             audioServer?.Close();
