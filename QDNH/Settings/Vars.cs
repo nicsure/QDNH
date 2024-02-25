@@ -13,7 +13,7 @@ namespace QDNH.Settings
         private const string configFile = "qdnh.conf";
         public const string Disabled = "Disabled";
 
-        public static string Version { get; } = "0.01.03q";
+        public static string Version { get; } = "0.01.04q";
         public static string AudioInput { get; set; } = Disabled;
         public static string AudioOutput { get; set; } = Disabled;
         public static string ComPort { get; set; } = Disabled;

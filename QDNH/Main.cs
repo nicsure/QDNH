@@ -175,20 +175,21 @@ namespace QDNH
 
         private static void DisplayNetPorts()
         {
-            Console.WriteLine($"\nNetwork Ports\n  {Vars.NetworkPort}, {Vars.NetworkPort + 1}");
+            Console.WriteLine($"\nNetwork Ports\t\t{Vars.NetworkPort}, {Vars.NetworkPort + 1}");
+            Console.WriteLine($"\nLocal Hostname\t\t{Dns.GetHostName()}");
         }
 
         private static void DisplayPassword(bool unmask)
         {
             string isSet = Vars.Password.Length == 0 ? "NOT " : string.Empty;
-            Console.WriteLine($"\nLogin Password is {isSet}SET");
+            Console.WriteLine($"\nLogin Password\t\t{isSet}SET");
             if (unmask)
                 Console.WriteLine($"  {Vars.Password}");
         }
 
         private static void DisplayLatency()
         {
-            Console.WriteLine($"\nAudio Latency\n  {Vars.Latency}");
+            Console.WriteLine($"\nAudio Latency\t\t{Vars.Latency}");
         }
 
         private static void DisplayAll()
