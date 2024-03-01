@@ -19,7 +19,7 @@ namespace QDNH.Audio
             try
             {
                 provider = new(new(22050, 16, 1));
-                playback = new WasapiOut(device, AudioClientShareMode.Shared, true, Vars.Latency);
+                playback = new WasapiOut(device, AudioClientShareMode.Shared, true, Vars.LatencyMils);
                 playback.Init(provider);
                 playback.Play();
                 return;
@@ -37,7 +37,7 @@ namespace QDNH.Audio
         {
             if (provider != null)
             {
-                if (provider.BufferedDuration.TotalSeconds > Vars.LatencyMS)
+                if (provider.BufferedDuration.TotalSeconds > Vars.LatencySecs)
                     provider.ClearBuffer();
                 provider.AddSamples(data, 0, length);
             }

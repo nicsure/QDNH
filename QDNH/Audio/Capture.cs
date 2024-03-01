@@ -19,7 +19,7 @@ namespace QDNH.Audio
             Exception exception;
             try
             {
-                capture = new WasapiCapture(device, true, Vars.Latency)
+                capture = new WasapiCapture(device, true, Vars.LatencyMils)
                 {                    
                     WaveFormat = new(22050, 16, 1),                    
                 };
