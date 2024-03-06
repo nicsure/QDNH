@@ -17,7 +17,7 @@ namespace QDNH.Settings
         public static bool Loaded { get; private set; } = false;
         public static string Config { get => config; set => config = value; }
         public static string ConfigFile => $"{config}{confExt}";
-        public static string Version { get; } = "0.01.05q";
+        public static string Version { get; } = "0.01.06q";
         public static string AudioInput { get; set; } = Disabled;
         public static string AudioOutput { get; set; } = Disabled;
         public static string ComPort { get; set; } = Disabled;
