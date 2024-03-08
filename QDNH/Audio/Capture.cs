@@ -1,4 +1,5 @@
 ﻿using NAudio.CoreAudioApi;
+using QDNH.Language;
 using QDNH.Settings;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace QDNH.Audio
             {
                 capture = new WasapiCapture(device, true, Vars.LatencyMils)
                 {                    
-                    WaveFormat = new(22050, 16, 1),                    
+                    WaveFormat = Vars.WaveFormat,                    
                 };
                 capture.DataAvailable += DataAvailable;
                 capture.StartRecording();
@@ -30,7 +31,7 @@ namespace QDNH.Audio
             catch(Exception e)
             {
                 exception = e;
-                Console.Error.WriteLine("Error opening audio input device");
+                Vars.Err(Lang.OpenInputError);
             }
             Close();
             throw exception;

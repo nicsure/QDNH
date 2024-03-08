@@ -1,4 +1,6 @@
-﻿using System;
+﻿using QDNH.Language;
+using QDNH.Settings;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -25,7 +27,7 @@ namespace QDNH.Serial
             catch
             {
                 closed = true;
-                Console.Error.WriteLine($"Error opening serial port {comPort}");
+                Vars.Err($"{Lang.OpenComError} {comPort}");
                 throw;
             }
         }

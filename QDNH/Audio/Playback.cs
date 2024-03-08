@@ -1,5 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using QDNH.Language;
 using QDNH.Settings;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace QDNH.Audio
             Exception exception;
             try
             {
-                provider = new(new(22050, 16, 1));
+                provider = new(Vars.WaveFormat);
                 playback = new WasapiOut(device, AudioClientShareMode.Shared, true, Vars.LatencyMils);
                 playback.Init(provider);
                 playback.Play();
@@ -26,7 +27,7 @@ namespace QDNH.Audio
             }
             catch(Exception e)
             {
-                Console.Error.WriteLine("Error opening audio output device");
+                Vars.Err(Lang.OpenOutputError);
                 exception = e;
             }
             Close();

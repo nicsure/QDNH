@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NAudio.Wave;
+using QDNH.Language;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,21 +13,22 @@ namespace QDNH.Settings
         private const int defaultPort = 18822;
         private const int defaultLatency = 100;
         public const string confExt = ".conf";
-        public const string Disabled = "Disabled";
         private static string config = "default";
 
         public static bool Loaded { get; private set; } = false;
         public static string Config { get => config; set => config = value; }
         public static string ConfigFile => $"{config}{confExt}";
-        public static string Version { get; } = "0.01.06q";
-        public static string AudioInput { get; set; } = Disabled;
-        public static string AudioOutput { get; set; } = Disabled;
-        public static string ComPort { get; set; } = Disabled;
+        public static string Version { get; } = "0.01.07q";
+        public static string Language { get; set; } = "en";
+        public static string AudioInput { get; set; } = Lang.Disabled;
+        public static string AudioOutput { get; set; } = Lang.Disabled;
+        public static string ComPort { get; set; } = Lang.Disabled;
         public static int NetworkPort { get; set; } = defaultPort;
         public static string Password { get; set; } = string.Empty;
         public static int AudioInputDevice { get; set; } = -1;
         public static int AudioOutputDevice { get; set; } = -1;
         public static bool AllowSaveConfig { get; set; } = true;
+        public static WaveFormat WaveFormat { get; } = new(22050, 16, 1);
         public static int LatencyMils
         {
             get => latency;
@@ -59,11 +62,13 @@ namespace QDNH.Settings
                         Password,
                         nameof(LatencyMils),
                         LatencyMils.ToString(),
+                        nameof(Language),
+                        Language,
                     });
                 }
                 catch 
                 {
-                    Console.Error.WriteLine($"Error saving configuration file: {ConfigFile}");
+                    Err($"{Lang.SaveError}: {ConfigFile}");
                 }
             }
         }
@@ -82,6 +87,9 @@ namespace QDNH.Settings
                     switch (key)
                     {
                         case "":
+                            break;
+                        case nameof(Language):
+                            Lang.LoadLanguge(value);
                             break;
                         case nameof(AudioInput):
                             AudioInput = value;
@@ -102,7 +110,7 @@ namespace QDNH.Settings
                             LatencyMils = int.TryParse(value, out p) ? p : defaultLatency;
                             break;
                         default:
-                            Console.Error.WriteLine($"Error in configuration file: {key} / {value}");
+                            Err($"{Lang.ConfigError}: {key} / {value}");
                             break;
                     }
                 }
@@ -110,10 +118,20 @@ namespace QDNH.Settings
             catch(FileNotFoundException) { }
             catch
             {
-                Console.Error.WriteLine($"Error reading configuration file: {ConfigFile}");
+                Err($"{Lang.ReadError}: {ConfigFile}");
             }
         }
 
+        public static void Out(string s, string suffix = "\n") => Console.Write(s + suffix);
+
+        public static void Err(string s) => Console.Error.WriteLine($"{Lang.Error}: {s}");
+
+        public static string In() => Console.ReadLine() ?? string.Empty;
+
         public static int Clamp(this int val, int min, int max) => val < min ? min : val > max ? max : val;
+
+        public static string Element(this string[] array, int element) => element < array.Length && element >= 0 ? array[element] : string.Empty;
+
+        public static string Reformat(this string s) => s.Replace(@"\t", "\t").Replace(@"\n", "\n").Replace(@"\r", "\r");
     }
 }

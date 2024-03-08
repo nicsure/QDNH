@@ -1,4 +1,5 @@
-﻿using QDNH.Settings;
+﻿using QDNH.Language;
+using QDNH.Settings;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,7 +37,7 @@ namespace QDNH.Network
             catch
             {
                 closed = true;
-                Console.Error.WriteLine($"Error starting server on port {port}");
+                Vars.Err($"{Lang.StartError} {port}");
                 throw;
             }
         }
@@ -121,7 +122,7 @@ namespace QDNH.Network
                 }
                 if (auth.Challenge(chal))
                 {
-                    Debug.WriteLine($"Auth Passed {client.Client.LocalEndPoint}");
+                    //Debug.WriteLine($"Auth Passed {client.Client.LocalEndPoint}");
                     authenticated = true;
                     var st = stream;
                     while (!closed)
@@ -135,7 +136,7 @@ namespace QDNH.Network
                 }
                 else
                 {
-                    Debug.WriteLine($"Auth Failed {client.Client.LocalEndPoint}");
+                    //Debug.WriteLine($"Auth Failed {client.Client.LocalEndPoint}");
                 }
                 Disconnect();
             }

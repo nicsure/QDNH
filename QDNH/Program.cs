@@ -4,7 +4,7 @@ using QDNH;
 using QDNH.Settings;
 using System.Globalization;
 
-Console.WriteLine($"Quansheng Dock Network Host {Vars.Version}\n");
+Vars.Out($"Quansheng Dock Network Host {Vars.Version}\n");
 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 Main.Run(args);
 
@@ -13,6 +13,6 @@ static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEv
     Exception exception = e.ExceptionObject as Exception ?? new("Unknown Exception Event");
     if (exception != null)
     {
-        Console.Error.WriteLine($"An unhandled exception {exception} occurred:\n\n{exception.Message}");
+        Vars.Err($"An unhandled exception {exception} occurred:\n\n{exception.Message}");
     }
 }
