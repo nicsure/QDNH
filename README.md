@@ -25,6 +25,7 @@ On your x64 Windows PC
 - Download qdnh.zip from the latest release and unzip it to a folder of your choice. https://github.com/nicsure/QDNH/releases
 - Run QDNH.exe and allow network access if prompted
 - Using the console interface of QDNH select the correct devices for the AIOC (or equivalent)
+- (The audio devices will have AIOC in the name, the COM port can be anything, but you'll know if you get the right one because the lights on the AIOC will start flashing once you select the correct COM port)
 
 On your Android device
 - Navigate to the latest release section https://github.com/nicsure/QDNH/releases
