@@ -62,7 +62,7 @@ This is a little tricky due to the audio API (NAudio) that I have used in this p
 - Enter: M serial
 - Select the appropriateserial port with S
 - Now you have QDNH running on Linux with only Serial options enabled.
-- The confiurations will save so you only need to use the launch commands to start each instance in the future.
+- The configurations will save so you only need to use the launch commands to start each instance in the future.
 - (You may want to make them aliases)
 
-That's it. I am trying to come up with a better solution that this, but for now this functions. Indeed it is the way I am using QDNH myself, with a small Linux Thin Client PC. 
+That's it. I am trying to come up with a better solution than this, but for now this functions. Indeed it is the way I am using QDNH myself, with a small Linux Thin Client PC. 
