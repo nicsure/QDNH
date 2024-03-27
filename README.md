@@ -55,11 +55,14 @@ This is a little tricky due to the audio API (NAudio) that I have used in this p
 - (Your filename may be different, but it should be similar to the above)
 - Enter: wine 2> /dev/null QDNH.exe -C wine
 - Enter: M audio
-- Now you have QDNH running on WINE with only Audio options enabled.
 - Select the appropriate devices with I and O
+- Now you have QDNH running on WINE with only Audio options enabled.
 - Open a second terminal window and navigate to the same folder
 - Enter: dotnet QDNH.dll -C linux
 - Enter: M serial
+- Select the appropriateserial port with S
 - Now you have QDNH running on Linux with only Serial options enabled.
+- The confiurations will save so you only need to use the launch commands to start each instance in the future.
+- (You may want to make them aliases)
 
 That's it. I am trying to come up with a better solution that this, but for now this functions. Indeed it is the way I am using QDNH myself, with a small Linux Thin Client PC. 
