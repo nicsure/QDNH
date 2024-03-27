@@ -45,8 +45,8 @@ On your Android device
 This is a little tricky due to the audio API (NAudio) that I have used in this project. NAudio is a Windows only API and so in order to run QDNH on Linux you need to use WINE. However, due to WINE having problems accessing serial ports QDNH will not run correctly under WINE either. The solution (for now) is to run QDNH in split operation mode. You run it twice basically, one under WINE to serve audio and the other under Linux to serve serial. This is how you do it.
 - On your Linux machine make sure WINE is installed. This can differ from distro to distro, Google it.
 - Make sure you are a member of the 'dialout' group in order to be able to access serial ports.
-- Enter: sudo usermod -a -G dialout <username>
-- (Replace <username> with your actual Linux username)
+- Enter: sudo usermod -a -G dialout username
+- (Replace username with your actual Linux username)
 - Download the .NET 6.0 x64 runtime packs for Windows and Linux here. https://dotnet.microsoft.com/en-us/download/dotnet/6.0
 - (Note you want the runtime, not the SDK)
 - Install the Linux version of the .NET 6.0 runtime.
