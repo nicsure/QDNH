@@ -38,3 +38,5 @@ On your Android device
 - In the settings page edit the Host, it should be 127.0.0.1 initially
 - Change this to the IP of the Windows PC you took note of earlier.
 - Tap Back.
+- .
+- Be aware that QDockX is in early development and is not perfect. There will undoubtedly be bugs and glitches. Also understand that App optimization for battery usage is a tricky thing, it may take me a few more versions to fine tune it, until then the app will most likely rape your phone's battery.
