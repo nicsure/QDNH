@@ -23,7 +23,7 @@ namespace QDNH
 
     public static class Main
     {
-        private static MMDeviceCollection inputDevices = null!, outputDevices = null!;
+        private static MMDeviceCollection? inputDevices = null, outputDevices = null;
         private static string[] ports = null!;
         private static Listen? audioServer = null, serialServer = null;
         private static UART? serialPort = null;
@@ -38,25 +38,31 @@ namespace QDNH
 
         public static void Run(string[] args)
         {
-            EnumerateDevices();
-            for (int i = 0; i < args.Length; i += 2)
+            if (args.Length > 0)
             {
-                switch (ExecuteCommand($"{args[i]} {args.Element(i + 1)}"))
+                EnumerateDevices();
+                for (int i = 0; i < args.Length; i += 2)
                 {
-                    case CommandPostAction.Info:
-                    case CommandPostAction.Error:
-                        return;
-                    case CommandPostAction.LoadConfig:
-                        Vars.AllowSaveConfig = true;
-                        Vars.Load();
-                        break;
-                    default:
-                        Vars.AllowSaveConfig = false;
-                        break;
+                    switch (ExecuteCommand($"{args[i]} {args.Element(i + 1)}"))
+                    {
+                        case CommandPostAction.Info:
+                        case CommandPostAction.Error:
+                            return;
+                        case CommandPostAction.LoadConfig:
+                            Vars.AllowSaveConfig = true;
+                            Vars.Load();
+                            break;
+                        default:
+                            Vars.AllowSaveConfig = false;
+                            break;
+                    }
                 }
             }
             if (!Vars.Loaded)
+            {
                 Vars.Load();
+                EnumerateDevices();
+            }
             Init();
             bool quit = false;
             while (!quit)
@@ -116,40 +122,70 @@ namespace QDNH
                         break;
                     case "I":
                         if (p.Length == 1) { DisplayInputs(); break; }
-                        if (inputDevices != null && p1 >= 0 && p1 <= inputDevices.Count)
+                        if (Vars.Audio)
                         {
-                            Vars.AudioInput = p1 == 0 ? Lang.Disabled : inputDevices[p1 - 1].FriendlyName;
-                            postAction = CommandPostAction.Init;
+                            if (inputDevices != null && p1 >= 0 && p1 <= inputDevices.Count)
+                            {
+                                Vars.AudioInput = p1 == 0 ? Lang.Disabled : inputDevices[p1 - 1].FriendlyName;
+                                postAction = CommandPostAction.Init;
+                            }
+                            else
+                            {
+                                Err($"{Lang.InvalidDevice} '{Lang.Input} {p1}'");
+                                postAction = CommandPostAction.Error;
+                            }
                         }
                         else
                         {
-                            Err($"{Lang.InvalidDevice} '{Lang.Input} {p1}'");
+                            Err(Lang.AudioDisabled);
                             postAction = CommandPostAction.Error;
                         }
                         break;
                     case "O":
                         if (p.Length == 1) { DisplayOutputs(); break; }
-                        if (outputDevices != null && p1 >= 0 && p1 <= outputDevices.Count)
+                        if (Vars.Audio)
                         {
-                            Vars.AudioOutput = p1 == 0 ? Lang.Disabled : outputDevices[p1 - 1].FriendlyName;
-                            postAction = CommandPostAction.Init;
+                            if (outputDevices != null && p1 >= 0 && p1 <= outputDevices.Count)
+                            {
+                                Vars.AudioOutput = p1 == 0 ? Lang.Disabled : outputDevices[p1 - 1].FriendlyName;
+                                postAction = CommandPostAction.Init;
+                            }
+                            else
+                            {
+                                Err($"{Lang.InvalidDevice} '{Lang.Output} {p1}'");
+                                postAction = CommandPostAction.Error;
+                            }
                         }
                         else
                         {
-                            Err($"{Lang.InvalidDevice} '{Lang.Output} {p1}'");
+                            Err(Lang.AudioDisabled);
                             postAction = CommandPostAction.Error;
                         }
                         break;
                     case "S":
                         if (p.Length == 1) { DisplayComPorts(); break; }
-                        if (ports != null && p1 >= 0 && p1 <= ports.Length)
+                        if (Vars.Serial)
                         {
-                            Vars.ComPort = p1 == 0 ? Lang.Disabled : ports[p1 - 1];
-                            postAction = CommandPostAction.Init;
+                            if (ports != null && p1 >= 0 && p1 <= ports.Length)
+                            {
+                                Vars.ComPort = p1 == 0 ? Lang.Disabled : ports[p1 - 1];
+                                postAction = CommandPostAction.Init;
+                            }
+                            else
+                            if(p1s.StartsWith("tty"))
+                            {
+                                Vars.ComPort = p1s;
+                                postAction = CommandPostAction.Init;
+                            }
+                            else
+                            {
+                                Err($"{Lang.InvalidDevice} '{Lang.Serial} {p1}'");
+                                postAction = CommandPostAction.Error;
+                            }
                         }
                         else
                         {
-                            Err($"{Lang.InvalidDevice} '{Lang.Serial} {p1}'");
+                            Err(Lang.SerialDisabled);
                             postAction = CommandPostAction.Error;
                         }
                         break;
@@ -185,7 +221,17 @@ namespace QDNH
                         Lang.LoadLanguge(p1s);
                         Vars.Save();
                         postAction = CommandPostAction.Overview;
-                        break;                       
+                        break;
+                    case "M":
+                        if (p.Length == 1) { DisplayMode(); break; }
+                        switch(p1s.ToLower())
+                        {
+                            case var n when n == "all" || n == "audio" || n == "serial":
+                                Vars.Mode = n;
+                                postAction = CommandPostAction.Init;
+                                break;
+                        }
+                        break;
                     default:
                         Err($"{Lang.UnknownCommand} '{command}'");
                         postAction = CommandPostAction.Error;
@@ -205,9 +251,19 @@ namespace QDNH
 
         private static void EnumerateDevices()
         {
-            inputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-            outputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-            ports = SerialPort.GetPortNames();
+            if (Vars.Audio)
+            {
+                try
+                {
+                    inputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                    outputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                }
+                catch { }
+            }
+            if (Vars.Serial)
+            {
+                ports = SerialPort.GetPortNames();
+            }
         }
 
         private static void DisplayLanguage()
@@ -217,50 +273,61 @@ namespace QDNH
 
         private static void DisplayInputs()
         {
-            Out($"\n{Lang.AvailInput}");
-            Vars.AudioInputDevice = -1;
-            for (int i = -1; i < inputDevices.Count; i++)
+            if (Vars.Audio)
             {
-                string fn = i == -1 ? Lang.Disabled : inputDevices[i].FriendlyName;
-                string sel;
-                if (fn.Equals(Vars.AudioInput))
+                Out($"\n{Lang.AvailInput}");
+                Vars.AudioInputDevice = -1;
+                for (int i = -1; i < inputDevices?.Count; i++)
                 {
-                    sel = "*";
-                    Vars.AudioInputDevice = i;
+                    string fn = i == -1 ? Lang.Disabled : inputDevices[i].FriendlyName;
+                    string sel;
+                    if (fn.Equals(Vars.AudioInput))
+                    {
+                        sel = "*";
+                        Vars.AudioInputDevice = i;
+                    }
+                    else
+                        sel = " ";
+                    Out($" {sel}{i + 1} - {fn}");
                 }
-                else
-                    sel = " ";
-                Out($" {sel}{i + 1} - {fn}");
             }
         }
 
         private static void DisplayOutputs()
         {
-            Out($"\n{Lang.AvailOutput}");
-            Vars.AudioOutputDevice = -1;
-            for (int i = -1; i < outputDevices.Count; i++)
+            if (Vars.Audio)
             {
-                string fn = i == -1 ? Lang.Disabled : outputDevices[i].FriendlyName;
-                string sel;
-                if (fn.Equals(Vars.AudioOutput))
+                Out($"\n{Lang.AvailOutput}");
+                Vars.AudioOutputDevice = -1;
+                for (int i = -1; i < outputDevices?.Count; i++)
                 {
-                    sel = "*";
-                    Vars.AudioOutputDevice = i;
+                    string fn = i == -1 ? Lang.Disabled : outputDevices[i].FriendlyName;
+                    string sel;
+                    if (fn.Equals(Vars.AudioOutput))
+                    {
+                        sel = "*";
+                        Vars.AudioOutputDevice = i;
+                    }
+                    else
+                        sel = " ";
+                    Out($" {sel}{i + 1} - {fn}");
                 }
-                else
-                    sel = " ";
-                Out($" {sel}{i + 1} - {fn}");
             }
         }
 
         private static void DisplayComPorts()
         {
-            Out($"\n{Lang.AvailCom}");
-            for (int i = -1; i < ports.Length; i++)
+            if (Vars.Serial)
             {
-                string fn = i == -1 ? Lang.Disabled : ports[i];
-                string sel = fn.Equals(Vars.ComPort) ? "*" : " ";
-                Out($" {sel}{i + 1} - {fn}");
+                Out($"\n{Lang.AvailCom}");
+                for (int i = -1; i < ports.Length; i++)
+                {
+                    string fn = i == -1 ? Lang.Disabled : ports[i];
+                    string sel = fn.Equals(Vars.ComPort) ? "*" : " ";
+                    Out($" {sel}{i + 1} - {fn}");
+                }
+                if(Vars.ComPort.StartsWith("tty"))
+                    Out($" *F - /dev/{Vars.ComPort}");
             }
         }
 
@@ -283,8 +350,15 @@ namespace QDNH
             Out($"\n{Lang.Latency}\t\t{Vars.LatencyMils}");
         }
 
+        private static void DisplayMode()
+        {
+            if (!Vars.Audio || !Vars.Serial)
+                Out(Vars.Audio ? Lang.SerialDisabled : Lang.AudioDisabled);
+        }
+
         private static void DisplayAll()
         {
+            DisplayMode();
             DisplayInputs();
             DisplayOutputs();
             DisplayComPorts();
@@ -299,22 +373,34 @@ namespace QDNH
             Out($"({Lang.Selected})\n");
             DisplayAll();
             Vars.Save();
-            serialPort?.Close();
-            audioServer?.Close();
-            serialServer?.Close();
-            capture?.Close();
-            playback?.Close();
-            try { audioServer = new(Vars.NetworkPort, NetworkAudioCallback, true); } catch { }
-            try { serialServer = new(Vars.NetworkPort + 1, NetworkSerialCallback, false); } catch { }
-            if (!Vars.ComPort.Equals(Lang.Disabled))
+            if (Vars.Serial)
+            {
+                serialPort?.Close();
+                serialServer?.Close();
+            }
+            if (Vars.Audio)
+            {
+                audioServer?.Close();
+                capture?.Close();
+                playback?.Close();
+            }
+            if (Vars.Audio)
+            {
+                try { audioServer = new(Vars.NetworkPort, NetworkAudioCallback, true); } catch { }
+            }
+            if (Vars.Serial)
+            {
+                try { serialServer = new(Vars.NetworkPort + 1, NetworkSerialCallback, false); } catch { }
+            }
+            if (Vars.Serial && !Vars.ComPort.Equals(Lang.Disabled))
             {
                 try { serialPort = new(Vars.ComPort, SerialDataCallback); } catch { }
             }
-            if (Vars.AudioInputDevice > -1)
+            if (Vars.Audio && Vars.AudioInputDevice > -1)
             {
                 try { capture = new(inputDevices![Vars.AudioInputDevice], CaptureCallback); } catch { }
             }
-            if (Vars.AudioOutputDevice > -1)
+            if (Vars.Audio && Vars.AudioOutputDevice > -1)
             {
                 try { playback = new(outputDevices![Vars.AudioOutputDevice]); } catch { }
             }

@@ -14,12 +14,28 @@ namespace QDNH.Settings
         private const int defaultLatency = 100;
         public const string confExt = ".conf";
         private static string config = "default";
+        private static string mode = "all";
 
         public static bool Loaded { get; private set; } = false;
         public static string Config { get => config; set => config = value; }
         public static string ConfigFile => $"{config}{confExt}";
         public static string Version { get; } = "0.01.07q";
         public static string Language { get; set; } = "en";
+        public static string Mode
+        {
+            get => mode;
+            set
+            {
+                Audio = true;
+                Serial = true;
+                switch(mode = value)
+                {
+                    case "audio": Serial = false; break;
+                    case "serial": Audio = false; break;
+                    default: mode = "all"; break;
+                }
+            }
+        }
         public static string AudioInput { get; set; } = Lang.Disabled;
         public static string AudioOutput { get; set; } = Lang.Disabled;
         public static string ComPort { get; set; } = Lang.Disabled;
@@ -29,6 +45,8 @@ namespace QDNH.Settings
         public static int AudioOutputDevice { get; set; } = -1;
         public static bool AllowSaveConfig { get; set; } = true;
         public static WaveFormat WaveFormat { get; } = new(22050, 16, 1);
+        public static bool Audio { get; private set; } = true;
+        public static bool Serial { get; private set; } = true;
         public static int LatencyMils
         {
             get => latency;
@@ -64,6 +82,8 @@ namespace QDNH.Settings
                         LatencyMils.ToString(),
                         nameof(Language),
                         Language,
+                        nameof(Mode),
+                        Mode
                     });
                 }
                 catch 
@@ -108,6 +128,9 @@ namespace QDNH.Settings
                             break;
                         case nameof(LatencyMils):
                             LatencyMils = int.TryParse(value, out p) ? p : defaultLatency;
+                            break;
+                        case nameof(Mode):
+                            Mode = value;
                             break;
                         default:
                             Err($"{Lang.ConfigError}: {key} / {value}");

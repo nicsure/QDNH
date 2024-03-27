@@ -22,6 +22,9 @@ namespace QDNH.Network
         private readonly bool allowSkip = false;
         private readonly Task? loop = null;
         private Task skipTask = new(() => { });
+
+        public NetworkStream? Stream => stream;
+
         public Listen(int port, Action<byte[], int> callback, bool allowSkip)
         {
             skipTask.Start();

@@ -35,6 +35,8 @@ namespace QDNH.Language
         public static string SaveError => table[nameof(SaveError)];
         public static string ReadError => table[nameof(ReadError)];
         public static string ConfigError => table[nameof(ConfigError)];
+        public static string AudioDisabled => table[nameof(AudioDisabled)];
+        public static string SerialDisabled => table[nameof(SerialDisabled)];
         public static string Language => table[nameof(Language)];
         public static string HelpCL => table[nameof(HelpCL)].Reformat();
         public static string Help => table[nameof(Help)].Reformat();
@@ -65,6 +67,8 @@ namespace QDNH.Language
             { nameof(SaveError), "Saving configuration file" },
             { nameof(ReadError), "Reading configuration file" },
             { nameof(ConfigError), "Processing configuration file" },
+            { nameof(AudioDisabled), "Audio is not enabled" },
+            { nameof(SerialDisabled), "Serial is not enabled" },
             { nameof(Language), "Language" },
             { nameof(HelpCL),   @" Usage:\n" +
                                 @"  QDNH\t\t\t\t\tRun with default config, config is persistent\n" +
@@ -80,7 +84,8 @@ namespace QDNH.Language
                                 @"    -P password\t\tSet network password\n" +
                                 @"    -P none\t\tSet no authentication\n" +
                                 @"    -L milliseconds\tSet audio latency\n" +
-                                @"    -G language\t\tSet language\n" },
+                                @"    -G language\t\tSet language\n" +
+                                @"    -M all|audio|serial\t\tSet operation mode\n" },
             { nameof(Help),     @"\n" +
                                 @"I n\t\tChange input audio device number\n" +
                                 @"O n\t\tChange output audio device number\n" +
@@ -90,6 +95,7 @@ namespace QDNH.Language
                                 @"P newpassword\tSet login password\n" +
                                 @"P none\t\tClear login password\n" +
                                 @"L milliseconds\tSet audio latency\n" +
+                                @"M all|audio|serial\tSet operation mode\n" +
                                 @"R\t\tRefesh devices\n" +
                                 @"Q\t\tQuit program\n\n" }};
 
