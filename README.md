@@ -23,6 +23,7 @@ On your x64 Windows PC
 - Take note of your LAN IP address. It usually starts with 192.168....
 - Download and install .NET 6.0 runtime x64. https://dotnet.microsoft.com/en-us/download/dotnet/6.0
 - Download qdnh.zip from the latest release and unzip it to a folder of your choice. https://github.com/nicsure/QDNH/releases
+- (QDNH can generate a false positive malware alert, sorry about that but I can't control the incompetence of security software developers)
 - Run QDNH.exe and allow network access if prompted
 - Using the console interface of QDNH select the correct devices for the AIOC (or equivalent)
 - (The audio devices will have AIOC in the name, the COM port can be anything, but you'll know if you get the right one because the lights on the AIOC will start flashing once you select the correct COM port)
