@@ -11,6 +11,7 @@ For more information check out the entry on the QD Wiki here:  https://github.co
 - A similar application to Quansheng Dock only aimed at portable devices designed specifically to operate with QDNH.
 
 The Android APK for QDockX is available in the latest release section. You will NOT find this on the Play Store. Publishing and maintaining an App on the store is a nightmare. So it's distributed as an APK. In order to install it you have to enable installation of unknown apps on your device.
+Extra information QCockX is here: https://github.com/nicsure/QuanshengDock/wiki/45-%E2%80%90-QDockX-on-Android
 
 
 # Quickstart Guide
