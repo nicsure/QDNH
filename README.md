@@ -43,6 +43,8 @@ On your Android device
 - Be aware that QDockX is in early development and is not perfect. There will undoubtedly be bugs and glitches. Also understand that App optimization for battery usage is a tricky thing, it may take me a few more versions to fine tune it, until then the app will most likely rape your phone's battery.
 
 # Running QDNH on Linux
+I'm going to assume that Linux users are going to be a little more savvy and will know how to deal with firewalls and such. I cannot go through every possible distro and hardware variation out there in the Linux space. The following procedure worked on a 10ZIG thin client freshly installed with Lubuntu 22.04. The thin client cost me £15 on eBay and is about a decade old. So if it works on that, it should work on most things. Depending on your distro and hardware you may need to work some stuff out for yourself, if that's too much for you then I'd suggest that Linux isn't the OS for you, stick to Windows.   
+  
 Let's first deal with some pre-requisites.
 - Open a bash console/terminal
 - Install .NET 6.0 runtime package. ( Info: https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual )
