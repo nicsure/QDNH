@@ -43,4 +43,21 @@ On your Android device
 - Be aware that QDockX is in early development and is not perfect. There will undoubtedly be bugs and glitches. Also understand that App optimization for battery usage is a tricky thing, it may take me a few more versions to fine tune it, until then the app will most likely rape your phone's battery.
 
 # Running QDNH on Linux
-The next update has full Linux support. A guide on how to install and run QDNH on Linux will be here once the new release is out.
+Let's first deal with some pre-requisites.
+- Open a bash console/terminal
+- Install .NET 6.0 runtime package. ( Info: https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual )
+  - wget ht</b>tps://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+  - chmod +x ./dotnet-install.sh
+  - ./dotnet-install.sh --channel 6.0
+- Install ASound libraries
+  - sudo apt install libasound2-dev
+  - (Non-Debian based distros may have other package management commands)  
+
+Now for QDNH
+- Fetch the zip file from the latest release https://github.com/nicsure/QDNH/releases
+- Unzip this to a folder of your choice.
+- In the terminal navigate into this folder
+- Make the startup script executable
+  - chmod +x ./qdnh.sh
+- Run QDNH by executing the startup script
+  - ./qdnh.sh
