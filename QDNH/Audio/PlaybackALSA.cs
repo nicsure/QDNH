@@ -18,6 +18,8 @@ namespace QDNH.Audio
         {
             if (ALSA.Device is ISoundDevice device)
             {
+                // the Alsa.net library doesn't seem to have any async methods for audio operations
+                // but no matter, we can do things the old-fashioned way easily enough.
                 bgTask = Task.Run(() =>
                 {
                     try

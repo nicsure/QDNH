@@ -24,6 +24,10 @@ namespace QDNH.Audio
                 {
                     try
                     {
+                        // the recording system will output a WAV header at the start,
+                        // there's no need to handle this as it has an even length and will
+                        // just manifest as a "click" at the very start of the audio.
+                        // However, this will never normally get heard anway.
                         device.Record(DataAvailable, tokenSource.Token);
                     }
                     catch

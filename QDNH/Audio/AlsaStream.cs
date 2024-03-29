@@ -24,6 +24,10 @@ namespace QDNH.Audio
             high = latency + low;
             bSize = bufferSize;
             buf = new byte[bSize];
+            // The Alsa.net library I use here is primarily for playing and recording WAV files
+            // it's not really designed for audio streaming, but it can be leveraged with a little creativity.
+            // So we need to fabricate a WAV header for the stream so the library sees it as a WAV file
+            // being pumped in.
             wpos = ALSA.WavHeader(buf, 0);
         }
         public void Append(byte[] data, int length)

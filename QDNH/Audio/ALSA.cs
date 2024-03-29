@@ -41,6 +41,7 @@ namespace QDNH.Audio
         }
         private static int AddNumber(this byte[] b, long number, int byteCount, int index)
         {
+            // makes sure we always encode values as little endian regardless of the endianness of the platform
             while (byteCount-- > 0)
             {
                 b[index++] = (byte)number;
@@ -52,6 +53,10 @@ namespace QDNH.Audio
         private static int AddShort(this byte[] b, long s, int index) => AddNumber(b, s, 2, index);
         public static int WavHeader(byte[] b, int c)
         {
+            // this WAV header febricator simulates a WAV file of maximum length (around 4GB)
+            // allowing us to play at 22050,16,1 continuously for around 27 hours.
+            // The main class will reinitialize everything every 24 hours so it
+            // should never run out of time.
             long bytesPerSample = (Settings.RecordingBitsPerSample * Settings.RecordingChannels) / 8;
             long max = ((uint.MaxValue - 44) / bytesPerSample) * bytesPerSample;
             c = b.AddString("RIFF", c);
