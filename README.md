@@ -19,7 +19,7 @@ On your Radio
 - Install the current QDock firmware: https://github.com/nicsure/quansheng-dock-fw/releases
 - Connect radio to PC via AIOC or equivalent audio in, audio out and serial adapter.
 
-On your x64 Windows PC
+On your x64 Windows PC (For Linux look below)
 - Open command prompt and enter: ipconfig
 - Take note of your LAN IP address. It usually starts with 192.168....
 - Download and install .NET 6.0 runtime x64. https://dotnet.microsoft.com/en-us/download/dotnet/6.0
