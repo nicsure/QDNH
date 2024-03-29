@@ -10,7 +10,8 @@ For more information check out the entry on the QD Wiki here:  https://github.co
 # QDockX
 - A similar application to Quansheng Dock only aimed at portable devices designed specifically to operate with QDNH.
 
-The Android APK for QDockX is available in the latest release section. You will NOT find this on the Play Store. Publishing and maintaining an App on the store is a nightmare. So it's distributed as an APK. In order to install it you have to enable installation of unknown apps on your device.
+The Android APK for QDockX is available in the latest release section. You will NOT find this on the Play Store. Publishing and maintaining an App on the store is a nightmare. So it's distributed as an APK. In order to install it you have to enable installation of unknown apps on your device.  
+Extra information QDockX is here: https://github.com/nicsure/QuanshengDock/wiki/45-%E2%80%90-QDockX-on-Android
 
 
 # Quickstart Guide
@@ -40,3 +41,6 @@ On your Android device
 - Tap Back.
 - .
 - Be aware that QDockX is in early development and is not perfect. There will undoubtedly be bugs and glitches. Also understand that App optimization for battery usage is a tricky thing, it may take me a few more versions to fine tune it, until then the app will most likely rape your phone's battery.
+
+# Running QDNH on Linux
+The next update has full Linux support. A guide on how to install and run QDNH on Linux will be here once the new release is out.
