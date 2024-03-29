@@ -1,4 +1,5 @@
-﻿using NAudio.CoreAudioApi;
+﻿using Alsa.Net;
+using NAudio.CoreAudioApi;
 using QDNH.Audio;
 using QDNH.Language;
 using QDNH.Network;
@@ -7,6 +8,7 @@ using QDNH.Settings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Net;
@@ -21,15 +23,23 @@ namespace QDNH
         None, Quit, Init, Overview, Error, LoadConfig, Info
     }
 
+    public enum AudioPlatform
+    {
+        None, WASAPI, ALSA
+    }
+
     public static class Main
     {
         private static MMDeviceCollection? inputDevices = null, outputDevices = null;
+        private static readonly List<string> alsaDevices = new();
         private static string[] ports = null!;
         private static Listen? audioServer = null, serialServer = null;
         private static UART? serialPort = null;
-        private static Capture? capture = null;
-        private static Playback? playback = null;
+        private static ICapture? capture = null;
+        private static IPlayback? playback = null;
         private static bool commandLine = true;
+        private static AudioPlatform audioPlatform = AudioPlatform.None;
+        private static readonly System.Timers.Timer restartTimer = new(86400000);
 
         private static void Out(string s, string suffix = "\n") => Vars.Out(s, suffix);
 
@@ -38,6 +48,8 @@ namespace QDNH
 
         public static void Run(string[] args)
         {
+            restartTimer.Elapsed += RestartTimer_Elapsed;
+            restartTimer.Start();
             if (args.Length > 0)
             {
                 EnumerateDevices();
@@ -85,6 +97,11 @@ namespace QDNH
             }
         }
 
+        private static void RestartTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            Init();
+        }
+
         private static CommandPostAction ExecuteCommand(string command)
         {
             CommandPostAction postAction = CommandPostAction.None;
@@ -98,6 +115,14 @@ namespace QDNH
                 int p1 = int.TryParse(p1s, out int i) ? i : -1;
                 switch (p[0].ToUpper().Replace("-",""))
                 {
+                    case "#":
+                        if (Vars.Audio)
+                        {
+                            Vars.Out("Closing Audio");
+                            capture?.Close();
+                            playback?.Close();
+                        }
+                        break;
                     case "E":
                         DisplayInputs();
                         DisplayOutputs();
@@ -124,9 +149,10 @@ namespace QDNH
                         if (p.Length == 1) { DisplayInputs(); break; }
                         if (Vars.Audio)
                         {
-                            if (inputDevices != null && p1 >= 0 && p1 <= inputDevices.Count)
+                            var list = GetAudioDevices(true);
+                            if (p1 >= 0 && p1 <= list.Count)
                             {
-                                Vars.AudioInput = p1 == 0 ? Lang.Disabled : inputDevices[p1 - 1].FriendlyName;
+                                Vars.AudioInput = p1 == 0 ? Lang.Disabled : list[p1 - 1];
                                 postAction = CommandPostAction.Init;
                             }
                             else
@@ -145,9 +171,10 @@ namespace QDNH
                         if (p.Length == 1) { DisplayOutputs(); break; }
                         if (Vars.Audio)
                         {
-                            if (outputDevices != null && p1 >= 0 && p1 <= outputDevices.Count)
+                            var list = GetAudioDevices(false);
+                            if (p1 >= 0 && p1 <= list.Count)
                             {
-                                Vars.AudioOutput = p1 == 0 ? Lang.Disabled : outputDevices[p1 - 1].FriendlyName;
+                                Vars.AudioOutput = p1 == 0 ? Lang.Disabled : list[p1 - 1];
                                 postAction = CommandPostAction.Init;
                             }
                             else
@@ -249,16 +276,37 @@ namespace QDNH
             Out(commandLine ? Lang.HelpCL : Lang.Help);
         }
 
+        private static void EnumerateAudio()
+        {
+            audioPlatform = AudioPlatform.None;
+            try // will only work if the platform supports WASAPI
+            {
+                inputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                outputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                audioPlatform = AudioPlatform.WASAPI;
+                return;
+            }
+            catch { }
+            if (File.Exists("/proc/asound/card0/id")) // instead try ALSA
+            {
+                audioPlatform = AudioPlatform.ALSA;
+                alsaDevices.Clear();
+                for (int i = 0; i < 100; i++) // if we got more than 100 sound cards then DAMN!!
+                {
+                    // available sound cards can be found at /proc/asound/card<number>
+                    // go through them sequentially, first exception means no more cards
+                    string id;
+                    try { id = File.ReadAllText($"/proc/asound/card{i}/id"); } catch { break; }
+                    alsaDevices.Add(id.Replace('\n', ' ').Replace('\r', ' ').Trim());
+                }
+            }           
+        }
+
         private static void EnumerateDevices()
         {
             if (Vars.Audio)
             {
-                try
-                {
-                    inputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-                    outputDevices = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-                }
-                catch { }
+                EnumerateAudio();
             }
             if (Vars.Serial)
             {
@@ -271,15 +319,28 @@ namespace QDNH
             Out($"\n{Lang.Language}\t\t{Vars.Language}");
         }
 
+        private static List<string> GetAudioDevices(bool input)
+        {
+            return audioPlatform switch
+            {
+                AudioPlatform.ALSA => alsaDevices,
+                AudioPlatform.WASAPI => input ?
+                                        inputDevices?.Select(d => d.FriendlyName).ToList() ?? new() :
+                                        outputDevices?.Select(d => d.FriendlyName).ToList() ?? new(),
+                _ => new(),
+            };
+        }
+
         private static void DisplayInputs()
         {
             if (Vars.Audio)
             {
-                Out($"\n{Lang.AvailInput}");
+                var list = GetAudioDevices(true);
+                Out($"\n{Lang.AvailInput} [{audioPlatform}]");
                 Vars.AudioInputDevice = -1;
-                for (int i = -1; i < inputDevices?.Count; i++)
+                for (int i = -1; i < list.Count; i++)
                 {
-                    string fn = i == -1 ? Lang.Disabled : inputDevices[i].FriendlyName;
+                    string fn = i == -1 ? Lang.Disabled : list[i];
                     string sel;
                     if (fn.Equals(Vars.AudioInput))
                     {
@@ -297,11 +358,12 @@ namespace QDNH
         {
             if (Vars.Audio)
             {
-                Out($"\n{Lang.AvailOutput}");
+                var list = GetAudioDevices(false);
+                Out($"\n{Lang.AvailOutput} [{audioPlatform}]");
                 Vars.AudioOutputDevice = -1;
-                for (int i = -1; i < outputDevices?.Count; i++)
+                for (int i = -1; i < list.Count; i++)
                 {
-                    string fn = i == -1 ? Lang.Disabled : outputDevices[i].FriendlyName;
+                    string fn = i == -1 ? Lang.Disabled : list[i];
                     string sel;
                     if (fn.Equals(Vars.AudioOutput))
                     {
@@ -357,7 +419,7 @@ namespace QDNH
         }
 
         private static void DisplayAll()
-        {
+        {            
             DisplayMode();
             DisplayInputs();
             DisplayOutputs();
@@ -369,40 +431,52 @@ namespace QDNH
 
         private static void Init()
         {
+            restartTimer.Interval++;
+            restartTimer.Interval--;
             commandLine = false;
-            Out($"({Lang.Selected})\n");
+            Out($"\n({Lang.Selected})");
             DisplayAll();
             Vars.Save();
             if (Vars.Serial)
             {
                 serialPort?.Close();
                 serialServer?.Close();
+                if (!Vars.ComPort.Equals(Lang.Disabled))
+                {
+                    try { serialPort = new(Vars.ComPort, SerialDataCallback); } catch { }
+                }
+                try { serialServer = new(Vars.NetworkPort + 1, NetworkSerialCallback, false); } catch { }
             }
             if (Vars.Audio)
             {
                 audioServer?.Close();
                 capture?.Close();
                 playback?.Close();
-            }
-            if (Vars.Audio)
-            {
+                if (audioPlatform == AudioPlatform.ALSA) ALSA.Configure();
                 try { audioServer = new(Vars.NetworkPort, NetworkAudioCallback, true); } catch { }
-            }
-            if (Vars.Serial)
-            {
-                try { serialServer = new(Vars.NetworkPort + 1, NetworkSerialCallback, false); } catch { }
-            }
-            if (Vars.Serial && !Vars.ComPort.Equals(Lang.Disabled))
-            {
-                try { serialPort = new(Vars.ComPort, SerialDataCallback); } catch { }
-            }
-            if (Vars.Audio && Vars.AudioInputDevice > -1)
-            {
-                try { capture = new(inputDevices![Vars.AudioInputDevice], CaptureCallback); } catch { }
-            }
-            if (Vars.Audio && Vars.AudioOutputDevice > -1)
-            {
-                try { playback = new(outputDevices![Vars.AudioOutputDevice]); } catch { }
+                switch (audioPlatform)
+                {
+                    case AudioPlatform.WASAPI:
+                        if (Vars.AudioInputDevice > -1)
+                        {
+                            try { capture = new CaptureWASAPI(inputDevices![Vars.AudioInputDevice], CaptureCallback); } catch { }
+                        }
+                        if (Vars.AudioOutputDevice > -1)
+                        {
+                            try { playback = new PlaybackWASAPI(outputDevices![Vars.AudioOutputDevice]); } catch { }
+                        }
+                        break;
+                    case AudioPlatform.ALSA:
+                        if (Vars.AudioInputDevice > -1)
+                        {
+                            try { capture = new CaptureALSA(CaptureCallback); } catch { }
+                        }
+                        if (Vars.AudioOutputDevice > -1)
+                        {
+                            try { playback = new PlaybackALSA(); } catch { }
+                        }
+                        break;
+                }
             }
         }
 

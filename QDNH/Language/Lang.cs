@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 namespace QDNH.Language
 {
     public static class Lang
-    {
-        public static bool Loaded { get; private set; } = false;
+    {   
         public static string CommandPrompt => table[nameof(CommandPrompt)];
         public static string InvalidDevice => table[nameof(InvalidDevice)];
         public static string InvalidPort => table[nameof(InvalidPort)];
@@ -40,8 +39,7 @@ namespace QDNH.Language
         public static string Language => table[nameof(Language)];
         public static string HelpCL => table[nameof(HelpCL)].Reformat();
         public static string Help => table[nameof(Help)].Reformat();
-
-        private static readonly Dictionary<string, string> table = new()
+        private static readonly Dictionary<string, string> entable = new()
         {
             { nameof(CommandPrompt), "Command (? for help)" },
             { nameof(InvalidDevice), "Invalid device number" },
@@ -85,7 +83,7 @@ namespace QDNH.Language
                                 @"    -P none\t\tSet no authentication\n" +
                                 @"    -L milliseconds\tSet audio latency\n" +
                                 @"    -G language\t\tSet language\n" +
-                                @"    -M all|audio|serial\t\tSet operation mode\n" },
+                                @"    -M mode\t\tSet operation mode: all, serial or audio\n" },
             { nameof(Help),     @"\n" +
                                 @"I n\t\tChange input audio device number\n" +
                                 @"O n\t\tChange output audio device number\n" +
@@ -95,42 +93,59 @@ namespace QDNH.Language
                                 @"P newpassword\tSet login password\n" +
                                 @"P none\t\tClear login password\n" +
                                 @"L milliseconds\tSet audio latency\n" +
-                                @"M all|audio|serial\tSet operation mode\n" +
+                                @"M mode\t\tSet operation mode: all, serial or audio\n" +
                                 @"R\t\tRefesh devices\n" +
                                 @"Q\t\tQuit program\n\n" }};
+        private static readonly Dictionary<string, string> table = entable.Copy();
+
+        public static Dictionary<string, string> Copy(this Dictionary<string, string> source)
+        {
+            Dictionary<string, string> copy = new();
+            foreach (string key in source.Keys) copy[key] = source[key];
+            return copy;
+        }
+
+        public static void Copy(this Dictionary<string, string> source, Dictionary<string, string> destination)
+        {            
+            foreach (string key in source.Keys)
+                destination[key] = source[key];
+        }
 
         public static void LoadLanguge(string lang)
         {
+            entable.Copy(table);
+            string templateFile = $"template_{Vars.Version}.lang";
             lang = lang.ToLower();
-            string file = $"{lang}.lang";
-            if (lang.Equals("en"))
+            string langFile = $"{lang}.lang";
+            if (!File.Exists(templateFile))
             {
-                if (!File.Exists(file))
-                {
-                    string s = string.Empty;
-                    foreach(string k in table.Keys)
-                        s += $"{k}={table[k]}\r\n";
-                    File.WriteAllText(file, s);
-                }
+                string tmp = string.Empty;
+                foreach (string k in entable.Keys)
+                    tmp += $"{k}={entable[k]}\r\n";
+                File.WriteAllText(templateFile, tmp);
             }
-            try
+            if (!lang.Equals("en"))
             {
-                string[] lines = File.ReadAllLines(file);
-                foreach (string line in lines)
+                try
                 {
-                    string[] s = line.Trim().Split('=');
-                    if (s.Length > 1)
+                    string[] lines = File.ReadAllLines(langFile);
+                    foreach (string line in lines)
                     {
-                        string v = string.Join("=", s, 1, s.Length - 1);
-                        table[s[0].Trim()] = v;
+                        string[] s = line.Trim().Split('=');
+                        if (s.Length > 1)
+                        {
+                            string v = string.Join("=", s, 1, s.Length - 1);
+                            table[s[0].Trim()] = v;
+                        }
                     }
+                    Vars.Language = lang;
                 }
-                Vars.Language = lang;
-                Loaded = true;
-            }
-            catch
-            {
-                Vars.Err($"Loading language file {file}");
+                catch
+                {
+                    // yes this is literally in English because if there was an
+                    // error loading a new language there's no available translation is there?
+                    Vars.Err($"Loading language file {langFile}");
+                }
             }
         }
 

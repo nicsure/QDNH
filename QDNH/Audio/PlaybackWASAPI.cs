@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace QDNH.Audio
 {
-    public class Playback
+    public class PlaybackWASAPI : IPlayback
     {
         private readonly WasapiOut? playback;
         private readonly BufferedWaveProvider? provider;
-        public Playback(MMDevice device) 
+        public PlaybackWASAPI(MMDevice device) 
         {
             Exception exception;
             try

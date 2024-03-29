@@ -19,7 +19,7 @@ namespace QDNH.Settings
         public static bool Loaded { get; private set; } = false;
         public static string Config { get => config; set => config = value; }
         public static string ConfigFile => $"{config}{confExt}";
-        public static string Version { get; } = "0.01.07q";
+        public static string Version { get; } = "0.02.01q";
         public static string Language { get; set; } = "en";
         public static string Mode
         {

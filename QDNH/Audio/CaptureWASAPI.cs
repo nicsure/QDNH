@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace QDNH.Audio
 {
-    public class Capture
+    public class CaptureWASAPI : ICapture
     {
         private readonly WasapiCapture? capture;
         private readonly Action<byte[], int> callback;
 
-        public Capture(MMDevice device, Action<byte[], int> callback)
+        public CaptureWASAPI(MMDevice device, Action<byte[], int> callback)
         {
             this.callback = callback;
             Exception exception;
