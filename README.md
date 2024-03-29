@@ -43,30 +43,4 @@ On your Android device
 - Be aware that QDockX is in early development and is not perfect. There will undoubtedly be bugs and glitches. Also understand that App optimization for battery usage is a tricky thing, it may take me a few more versions to fine tune it, until then the app will most likely rape your phone's battery.
 
 # Running QDNH on Linux
-This is a little tricky due to the audio API (NAudio) that I have used in this project. NAudio is a Windows only API and so in order to run QDNH on Linux you need to use WINE. However, due to WINE having problems accessing serial ports QDNH will not run correctly under WINE either. The solution (for now) is to run QDNH in split operation mode. You run it twice basically, one under WINE to serve audio and the other under Linux to serve serial. This is how you do it.
-- On your Linux machine make sure WINE is installed. This can differ from distro to distro, Google it.
-- Make sure you are a member of the 'dialout' group in order to be able to access serial ports.
-- Enter: sudo usermod -a -G dialout username
-- (Replace username with your actual Linux username)
-- Download the .NET 6.0 x64 runtime packs for Windows and Linux here. https://dotnet.microsoft.com/en-us/download/dotnet/6.0
-- (Note you want the runtime, not the SDK)
-- Install the Linux version of the .NET 6.0 runtime.
-- Download the QDNH zip file from the latest release https://github.com/nicsure/QDNH/releases
-- Unzip QDNH to a folder of your choice.
-- Move the *Windows* .NET 6.0 runtime file you downloaded to this folder as well.
-- Open a terminal window and navigate to the folder where the unzipped QDNH is.
-- Enter: wine windowsdesktop-runtime-6.0.28-win-x64.exe
-- (Your filename may be different, but it should be similar to the above)
-- Enter: wine 2> /dev/null QDNH.exe -C wine
-- Enter: M audio
-- Select the appropriate devices with I and O
-- Now you have QDNH running on WINE with only Audio options enabled.
-- Open a second terminal window and navigate to the same folder
-- Enter: dotnet QDNH.dll -C linux
-- Enter: M serial
-- Select the appropriateserial port with S
-- Now you have QDNH running on Linux with only Serial options enabled.
-- The configurations will save so you only need to use the launch commands to start each instance in the future.
-- (You may want to make them aliases)
-
-That's it. I am trying to come up with a better solution than this, but for now this functions. Indeed it is the way I am using QDNH myself, with a small Linux Thin Client PC. 
+The next update has full Linux support. A guide on how to install and run QDNH on Linux will be here once the new release is out.
