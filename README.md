@@ -59,6 +59,7 @@ To find your IP Address
 
 Now for QDNH
 - Fetch the zip file from the latest release https://github.com/nicsure/QDNH/releases
+  - (Make sure you select the correct architecture for your device/PC, x64 or ARM64)
 - Unzip this to a folder of your choice.
 - In the terminal navigate into this folder
 - Make the startup script executable
