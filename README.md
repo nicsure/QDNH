@@ -53,6 +53,10 @@ Let's first deal with some pre-requisites.
   - sudo apt install libasound2-dev
   - (Non-Debian based distros may have other package management commands)  
 
+To find your IP Address
+- In the terminal type
+  - ip -4 address  
+
 Now for QDNH
 - Fetch the zip file from the latest release https://github.com/nicsure/QDNH/releases
 - Unzip this to a folder of your choice.
@@ -61,3 +65,5 @@ Now for QDNH
   - chmod +x ./qdnh.sh
 - Run QDNH by executing the startup script
   - ./qdnh.sh
+
+
